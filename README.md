@@ -1,131 +1,48 @@
-# Panduan Instalasi & Setup Lerd di Windows
+# Panduan Lengkap Setup WSL2 (Ubuntu) & Lerd di Windows
 
-Dokumentasi lengkap untuk menginstal dan menjalankan **Lerd** secara langsung dari sisi Windows menggunakan *installer* resmi maupun skrip PowerShell.
-
----
-
-## 1. Persyaratan Sistem
-
-* **Sistem Operasi:** Windows 10 (versi 2004 atau lebih baru) atau Windows 11 (x64 / Arm64).
-* **Virtualisasi:** Fitur virtualisasi (VT-x / AMD-V) aktif di BIOS.
-* **Ruang Penyimpanan:** Minimal 5 GB ruang kosong untuk *image* WSL2, Ubuntu, dan Podman.
+Dokumentasi ini disusun berdasarkan tahapan instalasi dan konfigurasi nyata mulai dari pemasangan distribusi Linux di WSL2, instalasi Lerd di Ubuntu, hingga akses proyek dan dashboard di Windows.
 
 ---
 
-## 2. Metode Instalasi dari Windows
+## 1. Instalasi & Konfigurasi WSL2 di Windows
 
-Anda dapat memilih salah satu dari dua metode otomatis berikut untuk menyiapkan Lerd, WSL2, dan aplikasi desktop Windows sekaligus:
+Buka **PowerShell** (atau Windows Terminal) di Windows dan jalankan langkah-langkah berikut:
 
-### Metode A: Menggunakan Installer GUI (`Install-Lerd.exe`) — *Direkomendasikan*
-1. Unduh file `Install-Lerd.exe` terbaru melalui halaman rilis resmi [GitHub Lerd Desktop](https://github.com) atau situs [Lerd for Windows](https://lerd.sh/getting-started/windows).
-2. Jalankan `Install-Lerd.exe` (jika muncul peringatan *Windows SmartScreen*, klik **More info** > **Run anyway**).
-3. Ikuti panduan *wizard*:
-   * Masukkan **username** dan **password** baru untuk lingkungan Linux WSL2.
-   * Jika fitur WSL belum aktif di Windows, *installer* akan meminta *restart* komputer satu kali dan melanjutkan proses pemasangan otomatis setelah Anda login kembali.
-4. Setelah selesai, **Aplikasi Desktop Lerd** dan ikon *system tray* akan otomatis terpasang di Windows.
-
-### Metode B: Menggunakan Perintah PowerShell
-1. Buka jendela **PowerShell** biasa (**bukan** *Run as Administrator*).
-2. Jalankan skrip instalasi resmi berikut:
-   ```powershell
-   irm https://lerd.sh/install.ps1 | iex
-   ```
-3. Skrip ini akan menjalankan tahapan yang sama dengan *installer* GUI dan hanya akan meminta izin Administrator saat Windows membutuhkannya.
-
----
-
-## 3. Verifikasi & Penggunaan dari Terminal Windows
-
-Setelah instalasi selesai, perintah `lerd` sudah terhubung dengan terminal Windows Anda (PowerShell / Windows Terminal) tanpa perlu membuka jendela Linux secara manual:
-
+### A. Cek Status Distribusi WSL
 ```powershell
-# Cek status seluruh layanan (Nginx, DNS, PHP, Database)
-lerd status
-
-# Menjalankan atau menghentikan seluruh layanan Lerd
-lerd start
-lerd stop
-
-# Membuka Dashboard Lerd (otomatis membuka Aplikasi Desktop atau Browser)
-lerd dashboard
-
-# Membuka tampilan Terminal UI (TUI) interaktif
-lerd tui
-```
-
----
-
-## 4. Manajemen Folder & Proyek di Windows
-
-Lerd menyimpan seluruh file situs di dalam sistem file WSL2 agar performa baca/tulis PHP dan Composer berjalan maksimal.
-
-### Mengakses Folder Proyek dari Windows Explorer
-Buka **File Explorer** (`Win + E`) dan masukkan jalur jaringan berikut di *address bar*:
-```text
-\\wsl.localhost\Ubuntu\home\<username_linux>\Lerd
-```
-*(Anda dapat mengklik kanan folder tersebut dan memilih **Pin to Quick access** agar mudah diakses kapan saja).*
-
-### Perintah Dasar Proyek (Jalankan dari PowerShell)
-```powershell
-# Membuat proyek baru melalui wizard interaktif Lerd
-lerd new
-
-# Mendaftarkan folder induk agar setiap sub-folder otomatis mendapat domain .test
-lerd park ~/Lerd
-
-# Melihat daftar situs aktif beserta versi PHP, Node, dan status HTTPS
-lerd sites
-```
-
----
-
-## 5. Fitur Utama & Layanan Bawaan
-
-* **Domain & SSL Otomatis:** Setiap proyek otomatis mendapatkan domain `https://<nama-projek>.test` dengan sertifikat SSL lokal yang sudah dipercaya oleh browser Windows.
-* **Multi-Versi PHP & Node:** Mengatur versi PHP dan Node.js berbeda untuk tiap proyek langsung melalui Dashboard Web/Desktop atau CLI (`lerd use php 8.4`).
-* **Layanan Database & Cache Bawaan:** MySQL, PostgreSQL, Redis, Meilisearch, RustFS, dan Mailpit dapat dinyalakan atau dimatikan dengan satu klik dari Dashboard (`http://lerd.localhost`).
-* **Expose LAN:** Membagikan akses situs lokal ke perangkat lain (seperti HP) dalam satu jaringan Wi-Fi melalui tombol **Expose LAN** di Dashboard.
-
----
-
-## 6. Pembaruan & Penghapusan (Uninstall)
-
-* **Memperbarui Lerd ke versi terbaru:**
-  ```powershell
-  lerd update
-  ```
-* **Menghapus Lerd dari Windows:**
-  Buka **Settings** > **Apps** > **Installed apps** di Windows, cari **Lerd**, lalu klik **Uninstall**.
-
-
-# Panduan Setup & Penggunaan WSL2 + Lerd (PHP & Laravel Environment)
-
-Dokumentasi lengkap instalasi, konfigurasi, hingga panduan harian menjalankan lingkungan pengembangan lokal berbasis **WSL2 (Ubuntu)** dan **Lerd** di Windows.
-
----
-
-## 1. Instalasi & Konfigurasi WSL2 (Windows)
-
-Jalankan perintah berikut di **PowerShell (Run as Administrator)**:
-
-```powershell
-# 1. Instal WSL dan distribusi Ubuntu
-wsl --install -d Ubuntu
-
-# 2. Atur Ubuntu sebagai distribusi default (penting jika Docker Desktop terinstal)
-wsl --set-default Ubuntu
-
-# 3. Cek status dan versi WSL
 wsl --list --verbose
 ```
+*(Jika sebelumnya sudah terpasang Docker Desktop, biasanya hanya muncul `docker-desktop` dan belum ada distribusi Linux utama).*
+
+### B. Instal Distribusi Ubuntu
+```powershell
+# (Opsional) Lihat daftar distribusi Linux yang tersedia secara online
+wsl --list --online
+
+# Instal Ubuntu
+wsl --install -d Ubuntu
+```
+Setelah proses unduhan selesai, jendela terminal Ubuntu akan terbuka otomatis untuk meminta Anda membuat **username** dan **password** Linux baru.
+
+### C. Ubah Ubuntu Menjadi Distribusi Default
+Agar perintah `wsl` langsung membuka terminal Ubuntu (bukan `docker-desktop`), ubah pengaturan default-nya di PowerShell:
+```powershell
+wsl --set-default Ubuntu
+```
 
 ---
 
-## 2. Instalasi Lerd di Ubuntu WSL
+## 2. Masuk ke Ubuntu & Instalasi Lerd
 
-Masuk ke terminal Ubuntu dengan mengetik `wsl` di PowerShell, lalu jalankan langkah berikut:
+### A. Masuk ke Terminal Ubuntu
+Dari PowerShell Windows, masuk ke lingkungan Linux dengan perintah:
+```powershell
+wsl
+```
+*(Pastikan prompt terminal sudah berubah menjadi `username@nama-pc:~$` sebelum menjalankan perintah Linux di bawah ini).*
 
+### B. Perbarui Sistem & Instal Lerd
+Jalankan perintah berikut di dalam **terminal Ubuntu**:
 ```bash
 # 1. Perbarui paket sistem Ubuntu
 sudo apt update && sudo apt upgrade -y
@@ -133,89 +50,89 @@ sudo apt update && sudo apt upgrade -y
 # 2. Instal Lerd beserta dependensinya
 curl -fsSL https://lerd.sh | bash
 
-# 3. Aktifkan integrasi jaringan WSL2 ke Windows (agar domain .test terbaca)
+# 3. Muat ulang konfigurasi shell (jika perintah lerd belum langsung terbaca)
+source ~/.bashrc
+
+# 4. Hubungkan jaringan WSL2 dengan Windows (agar domain .test terbaca)
 lerd wsl:setup
 
-# 4. Cek status layanan Lerd
+# 5. Cek status seluruh layanan Lerd
 lerd status
 ```
 
 ---
 
-## 3. Struktur Folder & Manajemen Proyek
+## 3. Manajemen Folder & Proyek (`park`)
 
-Semua proyek wajib disimpan di dalam sistem file Linux (bukan di drive `C:\` atau `D:\`) agar performa pembacaan file tetap cepat.
+Simpan seluruh proyek di dalam direktori Linux agar performa pembacaan file PHP/Laravel tetap cepat.
 
-* **Path di dalam terminal Ubuntu:** `/home/kangsseulgi/Lerd`
-* **Path akses dari Windows File Explorer:** `\\wsl.localhost\Ubuntu\home\kangsseulgi\Lerd`
+### A. Lokasi Folder Proyek
+* **Path di dalam terminal Ubuntu:** `/home/<username_linux>/Lerd`
+* **Path akses dari Windows File Explorer:** `\\wsl.localhost\Ubuntu\home\<username_linux>\Lerd`
 
-### Mendaftarkan Folder Proyek (`park`)
-Cukup dijalankan **satu kali** untuk folder induk. Setiap folder baru di dalamnya otomatis mendapatkan domain `.test`.
-
+### B. Daftarkan Folder Proyek ke Lerd
+Jalankan perintah berikut **satu kali saja** di terminal Ubuntu untuk mendaftarkan folder induk proyek:
 ```bash
+# Buat folder induk (jika belum ada)
 mkdir -p ~/Lerd
-lerd park ~/Lerd
-```
 
-### Perintah Manajemen Situs
-```bash
-# Melihat daftar folder yang diparkir
+# Daftarkan folder agar setiap sub-folder otomatis mendapatkan domain .test
+lerd park ~/Lerd
+
+# Cek daftar folder yang sudah diparkir
 lerd parked
 
-# Melihat daftar situs aktif beserta versi PHP, Node, dan status HTTPS
+# Cek daftar situs aktif, versi PHP, Node, dan status HTTPS
 lerd sites
-
-# Mengaktifkan HTTPS/TLS lokal (jalankan di dalam folder proyek)
-lerd secure
 ```
 
 ---
 
-## 4. Akses Antarmuka (UI) & Aplikasi di Windows
+## 4. Akses Aplikasi & Dashboard di Windows
 
-* **Dashboard Web UI Lerd:** `http://lerd.localhost` atau `http://127.0.0.1:7073`
-* **Terminal UI (TUI) Lerd:** Jalankan `lerd tui` di terminal Ubuntu.
-* **Domain Aplikasi Lokal:** `https://<nama-folder-projek>.test` (contoh: `https://sample.test`)
-* **Membuka Proyek di VS Code dari Terminal:**
+Setelah Lerd aktif, semua layanan dan proyek dapat diakses langsung dari Windows:
+
+* **Dashboard Web UI Lerd:** Buka `http://lerd.localhost` atau `http://127.0.0.1:7073` di browser Windows.
+* **Domain Aplikasi Lokal:** Buka `https://<nama-folder-projek>.test` di browser Windows.
+* **Akses dari Perangkat Lain (HP/Laptop satu Wi-Fi):** Aktifkan tombol **Expose LAN** pada proyek melalui Dashboard Web UI Lerd.
+* **Akses Cepat dari Terminal Ubuntu:**
   ```bash
-  cd ~/Lerd/sample
+  # Membuka proyek di VS Code Windows
+  cd ~/Lerd/<nama-projek>
   code .
-  ```
-* **Membuka Folder Linux di Windows Explorer:**
-  ```bash
+
+  # Membuka direktori aktif di Windows File Explorer
   explorer.exe .
   ```
 
 ---
 
-## 5. Checklist Setelah Komputer Restart
+## 5. Langkah Setelah Komputer Restart
 
-Setiap kali Windows di-restart, WSL akan mati secara otomatis. Ikuti langkah singkat ini untuk menyalakannya kembali (tidak perlu instal ulang atau `park` ulang):
+Setiap kali Windows di-restart, WSL akan berhenti secara otomatis. Anda **tidak perlu** menginstal atau melakukan `lerd park` ulang. Lakukan 3 langkah ini saat komputer menyala kembali:
 
-1. **Buka Terminal Ubuntu:** Buka aplikasi **Ubuntu** di Start Menu atau ketik `wsl` di PowerShell.
+1. **Bangunkan WSL Ubuntu:** Buka aplikasi **Ubuntu** di Start Menu atau ketik `wsl` di PowerShell.
 2. **Nyalakan Layanan Lerd:**
    ```bash
    lerd start
    ```
-3. **Sinkronisasi Ulang Jaringan WSL (jika domain `.test` belum terbuka):**
+3. **Sinkronisasi Jaringan WSL (jika domain `.test` atau IP berubah):**
    ```bash
    lerd wsl:setup
    ```
-4. **Cek Status:** Jalankan `lerd status` dan buka `http://lerd.localhost` di browser Windows (aktifkan kembali fitur **Expose LAN** dari dashboard jika diperlukan).
+4. **Cek Dashboard & Status:** Jalankan `lerd status`, lalu buka `http://lerd.localhost` di browser Windows (aktifkan kembali **Expose LAN** dari dashboard jika diperlukan).
 
-> **Catatan:** Biarkan jendela terminal Ubuntu tetap terbuka (cukup di-*minimize*) selama Anda bekerja agar layanan di latar belakang tidak berhenti.
+> **Tips:** Biarkan jendela terminal Ubuntu tetap terbuka (cukup di-*minimize*) selama Anda bekerja agar layanan di latar belakang tidak mati.
 
 ---
 
-## 6. Troubleshooting Singkat
+## 6. Perintah Pemeliharaan & Troubleshooting
 
-* **Menghemat RAM saat selesai bekerja (di PowerShell Windows):**
+* **Mematikan WSL untuk menghemat RAM saat selesai bekerja (jalankan di PowerShell Windows):**
   ```powershell
   wsl --shutdown
   ```
-* **Domain `.test` tidak bisa diakses di browser Windows:**
-  1. Pastikan ekstensi VPN atau *Secure DNS* (DoH) di browser dalam keadaan nonaktif.
+* **Domain `.test` tidak terbuka di browser Windows:**
+  1. Matikan sementara ekstensi VPN atau fitur *Secure DNS* (DoH) di browser.
   2. Jalankan `ipconfig /flushdns` di PowerShell/CMD Windows.
-  3. Jalankan ulang `lerd wsl:setup` di terminal Ubuntu.
-
-
+  3. Jalankan `lerd wsl:setup` di terminal Ubuntu.
